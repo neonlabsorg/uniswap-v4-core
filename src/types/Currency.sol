@@ -46,13 +46,15 @@ library CurrencyLibrary {
         // modified custom error selectors
 
         bool success;
+        bytes memory data;
         if (currency.isAddressZero()) {
-            assembly ("memory-safe") {
-                // Transfer the ETH and revert if it fails.
-                success := call(gas(), to, amount, 0, 0, 0, 0)
-            }
-            // revert with NativeTransferFailed, containing the bubbled up error as an argument
-            if (!success) Wrap__NativeTransferFailed.selector.bubbleUpAndRevertWith(to);
+            // assembly ("memory-safe") {
+            //     // Transfer the ETH and revert if it fails.
+            //     success := call(gas(), to, amount, 0, 0, 0, 0)
+            // }
+            // // revert with NativeTransferFailed, containing the bubbled up error as an argument
+            (success, data) = payable(to).call{value: amount}("");
+            // if (!success) Wrap__NativeTransferFailed.selector.bubbleUpAndRevertWith(to);
         } else {
             assembly ("memory-safe") {
                 // Get a pointer to some free memory.
